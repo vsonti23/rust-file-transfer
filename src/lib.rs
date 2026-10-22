@@ -34,14 +34,18 @@
 //! every design decision.
 
 pub mod bitmap;
+pub mod client;
 pub mod error;
 pub mod hash;
 pub mod names;
 pub mod progress;
 pub mod protocol;
+pub mod server;
 pub mod state;
 
+pub use client::{SendOptions, SendReport, send_file, send_files};
 pub use error::{Result, TransferError};
+pub use server::{Server, ServerConfig};
 
 /// Number of chunks a file of `file_size` bytes splits into.
 pub fn chunk_count(file_size: u64, chunk_size: u32) -> u64 {
