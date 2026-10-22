@@ -241,9 +241,11 @@ async fn send(args: SendArgs) -> Result<()> {
                     String::new()
                 };
                 println!(
-                    "sent {} ({} bytes, {:.1} MiB/s, {} attempt(s){resumed}) sha256={}",
+                    "sent {} ({} bytes in {:.2}s incl. {:.2}s hashing, {:.1} MiB/s, {} attempt(s){resumed}) sha256={}",
                     rep.name,
                     rep.file_size,
+                    secs,
+                    rep.hash_elapsed.as_secs_f64(),
                     rep.file_size as f64 / secs / (1024.0 * 1024.0),
                     rep.attempts,
                     rft::hash::to_hex(&rep.sha256),

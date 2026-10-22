@@ -107,6 +107,8 @@ pub struct SendReport {
     pub bytes_sent: u64,
     /// Number of attempts (1 means no retries were needed).
     pub attempts: u32,
+    /// Time spent computing the whole-file SHA-256 before the first `Hello`.
+    pub hash_elapsed: Duration,
     /// Wall-clock time including hashing and verification.
     pub elapsed: Duration,
 }
@@ -187,7 +189,9 @@ pub async fn send_file(
         debug!(file_size, "hashing");
         // If the file changes after this point, the server's whole-file
         // check fails and nothing is committed.
+        let hash_started = Instant::now();
         let digest = sha256_file(path, None).await?;
+        let hash_elapsed = hash_started.elapsed();
         let ctx = Arc::new(FileCtx {
             addr: addr.to_owned(),
             path: path.to_owned(),
@@ -227,6 +231,7 @@ pub async fn send_file(
             resumed_bytes: resumed_bytes.unwrap_or(0),
             bytes_sent: ctx.bytes_sent.load(Ordering::Relaxed),
             attempts: attempt,
+            hash_elapsed,
             elapsed: started.elapsed(),
         };
         info!(

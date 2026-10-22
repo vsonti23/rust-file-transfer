@@ -610,6 +610,7 @@ impl Transfer {
             let (have, of) = (inner.completed.count(), inner.completed.len());
             return Err((ErrorCode::Incomplete, format!("have {have} of {of} chunks")));
         }
+        let verify_started = std::time::Instant::now();
         inner.sync_handle.sync_all().await.map_err(internal)?;
         let actual = sha256_file(&self.part_path, Some(self.file_size))
             .await
@@ -652,6 +653,7 @@ impl Transfer {
         info!(
             bytes = self.file_size,
             sha256 = %to_hex(&self.sha256),
+            verify = ?verify_started.elapsed(),
             "verified and committed"
         );
         Ok(())
