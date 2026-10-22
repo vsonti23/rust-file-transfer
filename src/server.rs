@@ -19,7 +19,7 @@
 //!    it renamed into place and the directory fsynced.
 //!
 //! Many connections may work on the same file at once (parallel streams);
-//! they share one [`Transfer`] through an `Arc`.
+//! they share one `Transfer` through an `Arc`.
 
 use std::collections::HashMap;
 use std::future::Future;

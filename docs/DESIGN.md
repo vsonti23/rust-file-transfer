@@ -114,7 +114,7 @@ about `streams x chunk_size` per side, plus socket buffers. Measured: about
 | Bigger bitmap (1 bit per chunk) and more acks | Coarser resume, and a slow link can take a long time per chunk, which interacts badly with timeouts |
 
 The default of **1 MiB** sits in the flat part of the curve. On the
-benchmark machine, 256 KiB was 2% to 17% slower than 1 MiB (barely
+benchmark machine, 256 KiB was 2% to 18% slower than 1 MiB (barely
 different on tmpfs, more on disk) and 4 MiB was no faster. Resume state for
 a 1 TiB file is 128 KiB of bitmap, and a lost chunk costs at most 1 MiB. The
 protocol allows 4 KiB to 16 MiB. The upper bound is what caps the server's
