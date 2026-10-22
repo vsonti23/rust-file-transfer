@@ -1,0 +1,44 @@
+[package]
+name = "rust-file-transfer"
+version = "0.1.0"
+edition = "2024"
+rust-version = "1.85"
+authors = ["Varshik Sonti <varshiksonti@gmail.com>"]
+description = "Concurrent, resumable, checksum-verified file transfer over TCP built on Tokio."
+license = "MIT"
+readme = "README.md"
+repository = "https://github.com/vsonti23/rust-file-transfer"
+keywords = ["file-transfer", "tokio", "async", "networking", "sha256"]
+categories = ["command-line-utilities", "network-programming"]
+publish = false
+
+[lib]
+name = "rft"
+path = "src/lib.rs"
+
+[[bin]]
+name = "rft"
+path = "src/main.rs"
+
+[dependencies]
+anyhow = "1.0"
+clap = { version = "4.5", features = ["derive"] }
+fastrand = "2"
+hex = "0.4"
+indicatif = "0.18"
+sha2 = "0.11"
+thiserror = "2"
+tokio = { version = "1.40", features = ["full"] }
+tracing = "0.1"
+tracing-subscriber = { version = "0.3", features = ["env-filter"] }
+
+[dev-dependencies]
+tempfile = "3"
+
+[profile.release]
+debug = 1
+
+# Optimize dependencies (notably sha2) even in debug and test builds, so the
+# large-file tests run at realistic speed while our own code stays debuggable.
+[profile.dev.package."*"]
+opt-level = 3
