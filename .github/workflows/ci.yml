@@ -1,0 +1,57 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+env:
+  CARGO_TERM_COLOR: always
+
+jobs:
+  lint:
+    name: fmt and clippy (MSRV 1.85)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: dtolnay/rust-toolchain@1.85
+        with:
+          components: rustfmt, clippy
+      - uses: Swatinem/rust-cache@v2
+      - name: cargo fmt
+        run: cargo fmt --all -- --check
+      - name: cargo clippy
+        run: cargo clippy --all-targets --locked -- -D warnings
+      - name: cargo doc
+        run: cargo doc --no-deps --locked
+        env:
+          RUSTDOCFLAGS: -D warnings
+
+  test:
+    name: test (${{ matrix.os }}, ${{ matrix.toolchain }})
+    runs-on: ${{ matrix.os }}
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-latest, macos-latest]
+        toolchain: ["1.85", stable]
+    steps:
+      - uses: actions/checkout@v4
+      - uses: dtolnay/rust-toolchain@master
+        with:
+          toolchain: ${{ matrix.toolchain }}
+      - uses: Swatinem/rust-cache@v2
+      - name: cargo test
+        run: cargo test --all-targets --locked
+      - name: doc tests
+        run: cargo test --doc --locked
+      - name: release build and smoke test
+        run: |
+          cargo build --release --locked
+          mkdir -p /tmp/rft-in
+          head -c 50000000 /dev/urandom > /tmp/rft-smoke.bin
+          ./target/release/rft serve --dir /tmp/rft-in --listen 127.0.0.1:7878 &
+          sleep 1
+          ./target/release/rft send /tmp/rft-smoke.bin --to 127.0.0.1:7878 --no-progress
+          test "$(./target/release/rft hash /tmp/rft-smoke.bin | cut -d' ' -f1)" = \
+               "$(./target/release/rft hash /tmp/rft-in/rft-smoke.bin | cut -d' ' -f1)"
